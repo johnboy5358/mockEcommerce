@@ -5,6 +5,8 @@
   // A curried map function.
   // map : fn -> [a, ...] -> [b, ...]
   const map = fn => coll => Array.prototype.map.call(coll, fn)
+  // a regex helper function.
+  const regExTest = str => regex => RegExp.prototype.test.call(regex,str)
     
   // Fetching bike data from this servers assets
   const bikeData = fetch('assets/data/bikeData.json')
@@ -56,14 +58,14 @@
 
   // Setup listener for click on basket content.
   domBasketContent.addEventListener('click', function(e) {
-    // const regexRemove = RegExp('remove#*')
+    const matchTargetId = regExTest(e.target.id)
     switch (true) {
-      case /continue-shopping/.test(e.target.id):
+      case matchTargetId(/continue-shopping/):
         console.log("Run a function to return to homepage.")
         domBasketContent.style.display = 'none'
         domMainContent.style.display = 'grid'
         break;
-      case (/remove#./.test(e.target.id)):
+      case matchTargetId(/remove#./):
         console.log("We are looking to remove an item from the basket.")
         const suffix = e.target.id.match(/#.*$/)
         console.log(suffix[0])
