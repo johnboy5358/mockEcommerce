@@ -5,18 +5,24 @@
   // A curried map function.
   // map : fn -> [a, ...] -> [b, ...]
   const map = fn => coll => Array.prototype.map.call(coll, fn)
-  
-  // Reference to the DOM main-content.
-  const mainContent = document.getElementById('main-content')
-  
+    
   // Fetching bike data from this servers assets
   const bikeData = fetch('assets/data/bikeData.json')
   const bikeJsonProm = bikeData
-    .then(response => response.json())
-    .catch((response) => {
-      console.log("Opps! something went wrong!", response)
-      return {bikeData: []}
-    })
+  .then(response => response.json())
+  .catch((response) => {
+    console.log("Opps! something went wrong!", response)
+    return {bikeData: []}
+  })
+  
+  /*
+  * MAIN CONTENT
+  * 
+  */
+ 
+ // Reference to the DOM main-content element.
+  const domMainContent = document.getElementById('main-content')
+  domMainContent.style.display = 'grid'
 
   // Use articleTemplate
   // mappedAreticle : [{}, ...] -> [String, ...]
@@ -24,19 +30,11 @@
   
   // put bike data in the DOM.
   bikeJsonProm.then(json => {
-    mainContent.innerHTML = (json.bikeData.length === 0)
+    domMainContent.innerHTML = (json.bikeData.length === 0)
       ? `<h1 class="alert">Opps, something went wrong!<span> could not get bike data.</span></h1>`
       : mappedArticle(json.bikeData).join('')
   })
 
-  /*
-    * MAIN CONTENT
-    * 
-  */
- 
-  const domMainContent = document.getElementById('main-content')
-  domMainContent.style.display = 'grid'
-  
   /*
     * SHOPPING BASKET
     * Stuff to do with the shopping basket
@@ -77,7 +75,7 @@
   })
 
   // Setup listener for article button clicks.
-  mainContent.onclick = e => addToCart(e)
+  domMainContent.onclick = e => addToCart(e)
   
   // Initialise dom basket [DOM side effects].
   domBasketItems.innerText = 0
