@@ -7,7 +7,7 @@
   const map = fn => coll => Array.prototype.map.call(coll, fn)
   // a regex helper function.
   const regExTest = str => regex => RegExp.prototype.test.call(regex,str)
-    
+
   // Fetching bike data from this servers assets
   const bikeData = fetch('assets/data/bikeData.json')
   const bikeJsonProm = bikeData
@@ -16,12 +16,12 @@
     console.log("Opps! something went wrong!", response)
     return {bikeData: []}
   })
-  
+
   /*
   * MAIN CONTENT
-  * 
+  *
   */
- 
+
  // Reference to the DOM main-content element.
   const domMainContent = document.getElementById('main-content')
   domMainContent.style.display = 'grid'
@@ -29,7 +29,7 @@
   // Use articleTemplate
   // mappedAreticle : [{}, ...] -> [String, ...]
   const mappedArticle = map(articleTemplate)
-  
+
   // put bike data in the DOM.
   bikeJsonProm.then(json => {
     domMainContent.innerHTML = (json.bikeData.length === 0)
@@ -41,12 +41,12 @@
     * SHOPPING BASKET
     * Stuff to do with the shopping basket
   */
-  
+
   const domBasket = document.getElementById('basket')
   const domBasketItems = document.getElementById('basket-items')
   const domBasketTotal = document.getElementById('basket-total')
   const domBasketContent = document.getElementById('basket-content')
-  
+
   // basket model
   const basket = {
     total: 0,
@@ -55,6 +55,19 @@
 
   // Setup listener for basket clicks. => show what is in the basket.
   domBasket.onclick = e => showBasket(e)
+
+  // Setup listener for article button clicks.
+  domMainContent.onclick = e => addToCart(e)
+
+  // Initialise dom basket [DOM side effects].
+  domBasketItems.innerText = 0
+  domBasketTotal.innerText = "0.00"
+
+
+  // Setup basket Proxy
+  const proxBasket = onchange(basket, () => {
+    updateTotal(basket)
+  })
 
   // Setup listener for click on basket content.
   domBasketContent.addEventListener('click', function(e) {
@@ -66,27 +79,16 @@
         domMainContent.style.display = 'grid'
         break;
       case matchTargetId(/remove#./):
-        console.log("We are looking to remove an item from the basket.")
-        const suffix = e.target.id.match(/#.*$/)
-        console.log(suffix[0])
+        console.log("removing an item from the basket")
+        const removeId = e.target.id.match(/#(.*)$/)[1]
+        basket['items'] = basket['items'].filter(v => v.id !== removeId)
+        document.getElementById(removeId).remove()
+        updateTotal(basket)
         break;
       default:
-        console.log("No action for this event!")  
+        console.log("No action for this event!")
         break;
     }
-  })
-
-  // Setup listener for article button clicks.
-  domMainContent.onclick = e => addToCart(e)
-  
-  // Initialise dom basket [DOM side effects].
-  domBasketItems.innerText = 0
-  domBasketTotal.innerText = "0.00"
-
-  
-  // Setup basket Proxy
-  const proxBasket = onchange(basket, () => {
-    updateTotal(basket)
   })
 
   // Basket onchange handler [DOM side effects].
@@ -108,7 +110,7 @@
     * end shopping basket stuff.
   */
 
-  
+
   /*
     * VIEW FUNCTIONS *
   */
@@ -135,14 +137,14 @@
     if (e.target.parentElement.id === 'basket') {
       domMainContent.style.display = 'none'
       domBasketContent.style.display = 'grid'
-      domBasketContent.innerHTML = 
+      domBasketContent.innerHTML =
       `
         <h2>You have ${basket.items.length} items in your basket</h2>
         <table>
           <tbody>
             ${basket.items.map((v, i) => {
               return (`
-                <tr>
+                <tr id="${v.id}">
                   <td><img src=${v.imgsrc} /></td>
                   <td>${v.hdg}</td>
                   <td>${v.price.length > 1 ? (`£${v.price[0]} - £${v.price[v.price.length-1]}`) : (`£${v.price[0]}`)}</td>
@@ -159,5 +161,5 @@
       `
     }
   }
-  
+
 }(onchange))
